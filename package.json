@@ -1,5 +1,6 @@
 {
-  "name": "svelte-app",
+  "name": "timezone-calculator",
+  "license": "UNLICENSED",
   "version": "1.0.0",
   "scripts": {
     "build": "rollup -c",
@@ -24,9 +25,7 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.161",
-    "lodash": "^4.17.20",
-    "moment-timezone": "^0.5.31",
+    "moment-timezone": "^0.5.45",
     "sirv-cli": "^1.0.0"
   }
 }

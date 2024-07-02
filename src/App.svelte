@@ -1,7 +1,9 @@
 <script lang="ts">
   import moment from "moment-timezone";
-  import _ from "lodash";
   import Column from "./Column.svelte";
+  import TimezoneSearch from "./Search.svelte";
+
+  const urlParams = new URLSearchParams(window.location.search);
 
   type Column = {
     zone: string;
@@ -9,12 +11,29 @@
     end: number;
   };
 
-  let zones: Column[] = [];
+  const zoneStrings = urlParams.get("zones");
 
-  const select = (event: any) => {
-    const zone = event.target.value;
-    if (!zone) return;
-    zones = [...zones, { zone, start: 9, end: 17 }];
+  let zones: Column[] = zoneStrings
+    ? zoneStrings.split(",").map((encoded) => {
+        const [zone, start, end] = encoded.split(":");
+        return { zone, start: +start, end: +end };
+      })
+    : [{ zone: moment.tz.guess(), start: 9, end: 17 }];
+
+  const updateQp = (columns: Column[]) => {
+    const url = new URL(window.location.href);
+    const zoneString = columns
+      .map(({ zone, start, end }) => `${zone}:${start}:${end}`)
+      .join(",");
+    if (zoneString) {
+      window.location.replace(`${url.origin}?zones=${zoneString}`);
+    } else {
+      window.location.replace(url.origin);
+    }
+  };
+
+  const addZone = (zone: string) => {
+    updateQp([...zones, { zone, start: 9, end: 17 }]);
   };
 
   const remove = (index: number) => {
@@ -23,29 +42,29 @@
 
   const swap = (index: number, target: number) => {
     if (target < 0 || target >= zones.length) return;
-
     const b = zones[target];
     zones[target] = zones[index];
     zones[index] = b;
-  };
-  const reset = () => {
-    zones = [{ zone: moment.tz.guess(), start: 9, end: 17 }];
+    updateQp(zones);
   };
 
-  onMount: reset();
+  const reset = () => {
+    updateQp([]);
+  };
+
+  const onTimeChanged = (idx: number, start: number, end: number) => {
+    if (zones[idx].start === start && zones[idx].end === end) return;
+    updateQp(zones.map((z, i) => (i === idx ? { ...z, start, end } : z)));
+  };
+
+  // onMount: reset();
 </script>
 
 <section aria-label="Controls" class="pt2 pb3 ph2">
   <button class="reset" on:click={reset}>Reset</button>
 
   <div class="dib ml3">
-    <label for="timezone" class="db">Add Time Zone</label>
-    <!-- svelte-ignore a11y-no-onchange -->
-    <select name="timezone" class="db" on:change={select}>
-      {#each moment.tz.names() as zone}
-        <option value={zone}>{zone}</option>
-      {/each}
-    </select>
+    <TimezoneSearch selectedZones={zones.map((z) => z.zone)} {addZone} />
   </div>
 </section>
 
@@ -59,7 +78,26 @@
         {swap}
         {remove}
         {index}
-        base={zones[0].zone} />
+        base={zones[0].zone}
+        timeChanged={onTimeChanged}
+      />
     {/each}
   </div>
 </section>
+
+<style>
+  :root {
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      Oxygen,
+      Ubuntu,
+      Cantarell,
+      "Open Sans",
+      "Helvetica Neue",
+      sans-serif;
+  }
+</style>
