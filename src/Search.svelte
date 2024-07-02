@@ -36,7 +36,7 @@
     {#if filteredZones.length > 0}
       <div class="search-results">
         {#each filteredZones as zone}
-          <div class="list-item" on:click={select}>{zone}</div>
+          <button class="list-item" on:click={select}>{zone}</button>
         {/each}
       </div>
     {/if}
@@ -64,6 +64,10 @@
   .list-item {
     padding: 0.5rem 0.25rem;
     cursor: pointer;
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
   }
 
   .list-item:hover {

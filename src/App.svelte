@@ -13,8 +13,8 @@
 
   const zoneStrings = urlParams.get("zones");
 
-  let zones: Column[] = zoneStrings
-    ? zoneStrings.split(",").map((encoded) => {
+  $: zones = zoneStrings
+    ? zoneStrings.split(",").map<Column>((encoded) => {
         const [zone, start, end] = encoded.split(":");
         return { zone, start: +start, end: +end };
       })
@@ -37,14 +37,16 @@
   };
 
   const remove = (index: number) => {
-    zones = zones.filter((_, i) => i !== index);
+    updateQp(zones.filter((_, i) => i !== index));
   };
 
   const swap = (index: number, target: number) => {
-    if (target < 0 || target >= zones.length) return;
-    const b = zones[target];
-    zones[target] = zones[index];
-    zones[index] = b;
+    const zoneCopy = [...zones];
+    if (target < 0 || target >= zoneCopy.length) return;
+
+    const b = zoneCopy[target];
+    zoneCopy[target] = zoneCopy[index];
+    zoneCopy[index] = b;
     updateQp(zones);
   };
 
@@ -84,20 +86,3 @@
     {/each}
   </div>
 </section>
-
-<style>
-  :root {
-    font-family:
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Roboto,
-      Oxygen,
-      Ubuntu,
-      Cantarell,
-      "Open Sans",
-      "Helvetica Neue",
-      sans-serif;
-  }
-</style>
